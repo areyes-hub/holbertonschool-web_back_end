@@ -1,6 +1,6 @@
 export default class Currency {
   constructor(code, name) {
-    if (typeof code !== 'string' && code.length > 1) {
+    if (typeof code !== 'string') {
       throw new TypeError('Code must be a one character string');
     }
     this._code = code;
@@ -15,7 +15,7 @@ export default class Currency {
   }
 
   set code(code) {
-    if (typeof code !== 'string' && code.length > 1) {
+    if (typeof code !== 'string') {
       throw new TypeError('Code must be a one character string');
     }
     this._code = code;
