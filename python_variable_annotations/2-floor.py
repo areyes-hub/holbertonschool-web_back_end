@@ -5,6 +5,6 @@ import math
 
 def floor(n: float) -> int:
     """
-    Returns two concatenated strings
+    Returns the floor of a float
     """
     return math.floor(n)
