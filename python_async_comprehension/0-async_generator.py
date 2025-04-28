@@ -3,6 +3,7 @@
 import random
 import asyncio
 
+
 async def async_generator():
     """
     Coroutine will loop 10 times
