@@ -1,34 +1,41 @@
-const fs = require('fs');
+const express = require('express');
+const readDatabase = require('./read_file_async');
 
-function readDatabase(path) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf-8', (err, data) => {
-      if (err) {
-        reject(new Error('Cannot load the database'));
-        return;
-      }
+const app = express();
+const PORT = 1245;
+const databasePath = process.argv[2];
 
-      const lines = data.trim().split('\n');
-      const students = {};
+app.get('/', (req, res) => {
+  res.send('Hello Holberton School!');
+});
 
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line === '') continue;
+app.get('/students', async (req, res) => {
+  let responseText = 'This is the list of our students\n';
 
-        const fields = line.split(',');
-        const firstName = fields[0];
-        const field = fields[fields.length - 1];
+  try {
+    const students = await readDatabase(databasePath);
+    let total = 0;
 
-        if (!students[field]) {
-          students[field] = [];
-        }
+    for (const field in students) {
+      total += students[field].length;
+    }
 
-        students[field].push(firstName);
-      }
+    responseText += `Number of students: ${total}\n`;
 
-      resolve(students);
-    });
-  });
-}
+    for (const field in students) {
+      const list = students[field].join(', ');
+      responseText += `Number of students in ${field}: ${students[field].length}. List: ${list}\n`;
+    }
 
-module.exports = readDatabase;
+    // Remove final newline
+    responseText = responseText.trim();
+    res.set('Content-Type', 'text/plain');
+    res.send(responseText);
+  } catch (err) {
+    res.status(500).send('Cannot load the database');
+  }
+});
+
+app.listen(PORT);
+
+module.exports = app;
