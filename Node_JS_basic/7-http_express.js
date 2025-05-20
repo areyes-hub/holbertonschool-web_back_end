@@ -1,44 +1,63 @@
 const express = require('express');
-const countStudents = require('./3-read_file_async');
+const fs = require('fs');
 
 const app = express();
-const PORT = 1245;
-const databasePath = process.argv[2];
+const port = 1245;
 
+// Function to read and process student data
+function countStudents(path) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) {
+        reject(new Error('Cannot load the database'));
+        return;
+      }
+
+      const lines = data.trim().split('\n');
+      const students = lines.slice(1).filter(line => line.trim() !== '');
+
+      const total = students.length;
+      const fields = {};
+
+      students.forEach((line) => {
+        const parts = line.split(',');
+        const firstname = parts[0];
+        const field = parts[3];
+
+        if (!fields[field]) {
+          fields[field] = [];
+        }
+        fields[field].push(firstname);
+      });
+
+      let result = `Number of students: ${total}`;
+      for (const [field, names] of Object.entries(fields)) {
+        result += `\nNumber of students in ${field}: ${names.length}. List: ${names.join(', ')}`;
+      }
+
+      resolve(result);
+    });
+  });
+}
+
+// Root route
 app.get('/', (req, res) => {
-  res.set('Content-Type', 'text/plain');
   res.send('Hello Holberton School!');
 });
 
+// /students route
 app.get('/students', async (req, res) => {
-  res.set('Content-Type', 'text/plain');
-
-  let response = 'This is the list of our students';
-
-  if (!databasePath) {
-    res.status(500).send('Cannot load the database');
-    return;
-  }
-
+  const path = process.argv[2]; // passed as argument to the script
   try {
-    const fields = await countStudents(databasePath);
-    let total = 0;
-    for (const field in fields) {
-      total += fields[field].length;
-    }
-
-    response += `\nNumber of students: ${total}`;
-    for (const field in fields) {
-      const list = fields[field].join(', ');
-      response += `\nNumber of students in ${field}: ${fields[field].length}. List: ${list}`;
-    }
-
-    res.send(response);
+    const studentInfo = await countStudents(path);
+    res.set('Content-Type', 'text/plain');
+    res.send(`This is the list of our students\n${studentInfo}`);
   } catch (err) {
-    res.status(500).send('Cannot load the database');
+    res.status(500).send('This is the list of our students\nCannot load the database');
   }
 });
 
-app.listen(PORT);
+// Start server
+app.listen(port);
 
 module.exports = app;
