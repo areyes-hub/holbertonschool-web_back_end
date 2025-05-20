@@ -6,29 +6,34 @@ const PORT = 1245;
 const databasePath = process.argv[2];
 
 app.get('/', (req, res) => {
+  res.set('Content-Type', 'text/plain');
   res.send('Hello Holberton School!');
 });
 
 app.get('/students', async (req, res) => {
-  let responseText = 'This is the list of our students\n';
+  res.set('Content-Type', 'text/plain');
+
+  let response = 'This is the list of our students';
+
+  if (!databasePath) {
+    res.status(500).send('Cannot load the database');
+    return;
+  }
 
   try {
-    const students = await countStudents(databasePath);
+    const fields = await countStudents(databasePath);
     let total = 0;
-
-    for (const field in students) {
-      total += students[field].length;
+    for (const field in fields) {
+      total += fields[field].length;
     }
 
-    responseText += `Number of students: ${total}\n`;
-
-    for (const field in students) {
-      const list = students[field].join(', ');
-      responseText += `Number of students in ${field}: ${students[field].length}. List: ${list}\n`;
+    response += `\nNumber of students: ${total}`;
+    for (const field in fields) {
+      const list = fields[field].join(', ');
+      response += `\nNumber of students in ${field}: ${fields[field].length}. List: ${list}`;
     }
 
-    res.set('Content-Type', 'text/plain');
-    res.send(responseText.trim());
+    res.send(response);
   } catch (err) {
     res.status(500).send('Cannot load the database');
   }
