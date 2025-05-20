@@ -1,5 +1,5 @@
 const express = require('express');
-const readDatabase = require('./read_file_async');
+const countStudents = require('./3-read_file_async');
 
 const app = express();
 const PORT = 1245;
@@ -13,7 +13,7 @@ app.get('/students', async (req, res) => {
   let responseText = 'This is the list of our students\n';
 
   try {
-    const students = await readDatabase(databasePath);
+    const students = await countStudents(databasePath);
     let total = 0;
 
     for (const field in students) {
@@ -27,10 +27,8 @@ app.get('/students', async (req, res) => {
       responseText += `Number of students in ${field}: ${students[field].length}. List: ${list}\n`;
     }
 
-    // Remove final newline
-    responseText = responseText.trim();
     res.set('Content-Type', 'text/plain');
-    res.send(responseText);
+    res.send(responseText.trim());
   } catch (err) {
     res.status(500).send('Cannot load the database');
   }
