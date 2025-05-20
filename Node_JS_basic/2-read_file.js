@@ -4,7 +4,7 @@ function countStudents(path) {
   try {
     const data = fs.readFileSync(path, 'utf8');
     const lines = data.split('\n').filter((line) => line.trim() !== '');
-    
+
     if (lines.length <= 1) {
       console.log('Number of students: 0');
       return;
